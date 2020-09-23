@@ -1,28 +1,32 @@
 version: "3.1"
 
+networks:
+    backend:
+
 services:
     web:
         container_name: myPokedex
         build: .
         ports:
             - "3000:3000"
-        links:
-            - mysql
+        networks:
+            - backend
         depends_on:
             - mysql
 
     mysql:
-        container_name: mysqlDB
+        container_name: pokemonsDB
         image: mysql:8.0.13
         restart: always
         command: --default-authentication-plugin=mysql_native_password
         ports:
             - "3306:3306"
-
+        networks:
+            - backend
         environment:
             MYSQL_ROOT_PASSWORD: root
-            MYSQL_DATABASE: test
+            MYSQL_DATABASE: pokemons
             MYSQL_USER: nicolas
             MYSQL_PASSWORD: nicolas
         volumes:
-            - ~/docker/mysql-data:/var/lib/myDB
+            - ~/docker/mysql-data:/var/lib/mysql

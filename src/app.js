@@ -1,22 +1,44 @@
 const express = require("express");
+const { Sequelize } = require("./database/db");
 const app = express();
 const sequelize = require("./database/db");
-const User = require("./database/models/User");
+const Pokemon = require("./database/models/Pokemon");
 
 // Setting
 const PORT = process.env.PORT || 3000;
 
+//Middleware
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
+
 // Rutas
+
 app.get("/", function (req, res) {
-    User.create({
-        name: "Pepe",
-        birthday: new Date(1999, 4, 6),
-    }).then((user) => {
-        res.json(user);
+    Pokemon.findAll().then((pokes) => {
+        res.status(200).json(pokes);
     });
-    User.findAll().then((users) => {
-        res.json(users);
+});
+
+app.get("/pokemon", (req, res) => {
+    const { type, attack } = req.query;
+
+    Pokemon.findAll({
+        where: Sequelize.and(Sequelize.or({ type1: type }, { type2: type }), {
+            attack,
+        }),
+    }).then((pokes) => {
+        res.json(pokes);
     });
+});
+
+app.get("/pokemon/:id", (req, res) => {
+    const { id } = req.params;
+
+    if (Number(id)) {
+        Pokemon.findByPk(id).then((poke) => {
+            res.json(poke);
+        });
+    }
 });
 
 // Arrancamos el servidor
